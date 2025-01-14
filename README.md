@@ -1,3 +1,3 @@
 # Grundlagen des Programmierens 2024-2025
 
-skibidibib
+Gemeinsames Repository für den Kurs "Grundlagen des Programmierens 2024/25".
