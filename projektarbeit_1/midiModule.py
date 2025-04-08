@@ -252,7 +252,7 @@ if __name__ == "__main__":
 	print(generateChords(60, "tristan"))
 	print(midiTranspose(60, 9))
 	print(arpeggio(60, "blue"))
-	print(invert(debugMelody, "retrogradeInversion"))
+	print(invert(debugMelody, "retrogradeInversion"))	
 	print(countMidiEvents(debugMelody))
 	print(getSubsequentInterval(60, 69))
 	print(countIntervals(debugMelody))
