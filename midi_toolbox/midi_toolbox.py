@@ -1,11 +1,14 @@
 
 """Midi-Toolbox
 
-- [ ] MidiEvent
-    - [ ] MidiNote
-    - [ ] MidiRest
-- [ ] Sequence
-    - [ ] Oktave
+- [ ] Docstrings
+
+- [x] MidiEvent
+    - [x] MidiNote
+    - [x] MidiRest
+- [-] Sequence
+    - [-] Oktave
+    - [ ] wie gehen wir bei getDurations und getOctaves mit Pausen um?
     - [ ] Notennamen
     - [ ] transponieren
     - [ ] Umkehrung
@@ -18,5 +21,3 @@
     - [ ] mtof <-> 
 - [ ] MidiDateien
     """
-
-
