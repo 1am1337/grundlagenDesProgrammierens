@@ -1,35 +1,35 @@
 
 
 - Midi-Toolbox
-	- MidiNote
-	- MidiRest
-	- Sequence (bisher ohne Ton-Überlappungen)
-		- Oktave
-		- Notennamen
-		- transponieren
-		- Umkehrung
-		- Krebs
-		- Analyse
-			- Intervalle zählen
-			- Noten zählen
-			- histogramme der intervalle
-			- rhythmische Dichte
-		- generate scale
-		- generate chord
-		- pattern generatoren (z.b. euclidean rhythms)
-		- velocity curves
-		- arpeggiate
-		- "humanisierung"
-			- random micro-timing
-			- random velocity fluctuation
-	- Abspielen
-		- mtof <->
-	- MidiDateien
-	- visualisierung 
-		- ascii-piano roll oder matplotlib
-- utility Funktionen
-	- input (Überprüfungsmöglichkeiten)
-	- Funktionen auswählen
+	- [x] MidiNote
+	- [x] MidiRest
+	- [ ] Sequence (bisher ohne Ton-Überlappungen)
+		- [x] Oktave
+		- [ ] Notennamen
+		- [x] transponieren
+		- [ ] Umkehrung
+		- [ ] Krebs
+		- [ ] Analyse
+			- [ ] Intervalle zählen
+			- [ ] Noten zählen
+			- [ ] histogramme der intervalle
+			- [ ] rhythmische Dichte
+		- [x] generate scale
+		- [ ] generate chord
+		- [ ] pattern generatoren (z.b. euclidean rhythms)
+		- [ ] velocity curves
+		- [ ] arpeggiate
+		- [ ] "humanisierung"
+			- [ ] random micro-timing
+			- [ ] random velocity fluctuation
+	- [ ] Abspielen
+		- [ ] mtof <->
+	- [ ] MidiDateien
+	- [ ] visualisierung 
+		- [ ] ascii-piano roll oder matplotlib
+- [ ] utility Funktionen
+	- [ ] input (Überprüfungsmöglichkeiten)
+	- [ ] Funktionen auswählen
 
 ```mermaid
 classDiagram
@@ -121,3 +121,22 @@ classDiagram
 - Assoziation
 	- Composition
 	- Aggregation
+
+
+- Midi-Dateien
+	- Midi-Streams
+		- Song
+		- Sequence
+		- Track
+	- Midi-Tonhöhen-Werte
+	- Velocity
+	- Dauer
+	- cc-Werte
+
+
+
+00000080
+0000 0000 0000 0000 0000 0000 1000 0000
+
+81 00
+0000 0000 0000 0000 1000 0001 0000 0000
