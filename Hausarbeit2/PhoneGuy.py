@@ -1,69 +1,118 @@
 import dearpygui.dearpygui as dpg
-import dearpygui_grid as dpgGrid
 import numpy as np
 import pyaudio
 import time
+import json
 
-p = pyaudio.PyAudio()
 
-WindowSize = [480, 600]
-sr = 48000
+
+
+WindowSize = (480, 600)
+srOptions = [8000, 22500, 44100, 48000, 96000, 192000]
 freq1 = [1209, 1336, 1477, 1633]
 freq2 = [697, 770, 852, 941]
-dur = 0.07
-vol = 0.8
+ButtonLabels = ["1","2","3","A","4","5","6","B","7","8","9", "C", "*", "0", "#", "D"]
+p = pyaudio.PyAudio()
+standardSettings = {
+	"volumeValue": 80,
+	"soundDurValue": 0.4,
+	"pauseDurValue": 0.01,
+	"srSelection": "41000",
+	"expandedNumpadValue": False
+} 
 
-dpg.create_context()
-dpg.setup_dearpygui()
-dpg.create_viewport(width=WindowSize[0], height=WindowSize[1], title="CALL THE FIREFIGHTERS!!")
-dpg.show_viewport()
-
-def GenerateSine(FreqPos):
-    data1 = np.sin(2 * np.pi * np.arange(sr*dur)* freq1[FreqPos[0]]/sr).astype(np.float32)
-    data2 = np.sin(2 * np.pi * np.arange(sr*dur)* freq2[FreqPos[1]]/sr).astype(np.float32)
-    data = data1 + data2
-    data = data / np.max(np.abs(data)) #normalisierung
+def generateSine(FreqPos):
+    sine1 = np.sin(2 * np.pi * np.arange(int(dpg.get_value("srMenu"))*dpg.get_value("soundDurValue"))* freq1[FreqPos[0]]/int(dpg.get_value("srMenu"))).astype(np.float32)
+    sine2 = np.sin(2 * np.pi * np.arange(int(dpg.get_value("srMenu"))*dpg.get_value("soundDurValue"))* freq2[FreqPos[1]]/int(dpg.get_value("srMenu"))).astype(np.float32)
+    sineAdded = sine1 + sine2
+    sineAdded = sineAdded / np.max(np.abs(sineAdded)) #normalisierung
     print(freq1[FreqPos[0]], freq2[FreqPos[1]])
-    return data
+    return sineAdded
 
-def PlayAudio(output_bytes):
-	stream = p.open(format=pyaudio.paFloat32, channels=1, rate=sr, output=True)
+def playAudio(output_bytes):
+	stream = p.open(format=pyaudio.paFloat32, channels=1, rate=int(dpg.get_value("srMenu")), output=True)
 	start_time = time.time()
 	stream.write(output_bytes)
 
-def ButtonPress(sender, app_data, user_data): # sender und app_data sind benötigt, dass user_data richtig funktioniert/zugeordnet wird
-	output = (vol * GenerateSine(user_data)).tobytes()
-	PlayAudio(output)
+def buttonPress(sender, app_data, user_data): # sender und app_data sind benötigt, dass user_data richtig zugeordnet wird
+	output = ((dpg.get_value("VolumeSettingSlider")/100) * generateSine(user_data)).tobytes()
+	playAudio(output)
 
-def AddButtons():
-	grid.push(dpg.add_button(parent=MainWindow,label="1", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [0,0]), 0, 0)
-	grid.push(dpg.add_button(parent=MainWindow,label="2", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [1,0]), 1, 0)
-	grid.push(dpg.add_button(parent=MainWindow,label="3", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [2,0]), 2, 0)
-	grid.push(dpg.add_button(parent=MainWindow,label="A", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [3,0]), 3, 0)
+def addButtons(sender, app_data, user_data):
+	if user_data == "checkboxValueChanged" and dpg.get_value("toggleExpandedNumpad") == True:
+		dpg.delete_item("buttonTableSmall")
+	elif user_data == "checkboxValueChanged" and dpg.get_value("toggleExpandedNumpad") == False:
+		dpg.delete_item("buttonTableLarge")
+	else:
+		pass
 
-	grid.push(dpg.add_button(parent=MainWindow,label="4", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [0,1]), 0, 1)
-	grid.push(dpg.add_button(parent=MainWindow,label="5", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [1,1]), 1, 1)
-	grid.push(dpg.add_button(parent=MainWindow,label="6", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [2,1]), 2, 1)
-	grid.push(dpg.add_button(parent=MainWindow,label="B", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [3,1]), 3, 1)
+	if dpg.get_value("expandedNumpadValue") == True:
+		with dpg.table(header_row=False, tag="buttonTableLarge", parent="tabNumpad"):
+			for i in range(4):
+				dpg.add_table_column(tag=f"buttonTableLargeColum{i}")
+			for i in range(0, 4):
+				with dpg.table_row(tag=f"buttonTableLargeRow{i}"):
+					for j in range(0, 4):
+						dpg.add_button(label=f"{ButtonLabels[(3*i)+(j+i)]}", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=buttonPress, user_data = [j,i])
 
-	grid.push(dpg.add_button(parent=MainWindow,label="7", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [0,2]), 0, 2)
-	grid.push(dpg.add_button(parent=MainWindow,label="8", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [1,2]), 1, 2)
-	grid.push(dpg.add_button(parent=MainWindow,label="9", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [2,2]), 2, 2)
-	grid.push(dpg.add_button(parent=MainWindow,label="C", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [3,2]), 3, 2)
+	else:
+		with dpg.table(header_row=False, tag="buttonTableSmall", parent="tabNumpad"):
+			for i in range(3):
+				dpg.add_table_column(tag=f"buttonTableSmallColum{i}")
+			for i in range(0, 4):
+				with dpg.table_row(tag=f"buttonTableSmallRow{i}"):
+					for j in range(0, 3):
+						dpg.add_button(label=f"{ButtonLabels[j+(4*i)]}", width=WindowSize[0]/3, height=WindowSize[1]/5, callback=buttonPress, user_data = [j,i])
 
-	grid.push(dpg.add_button(parent=MainWindow,label="*", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [0,3]), 0, 3)
-	grid.push(dpg.add_button(parent=MainWindow,label="0", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [1,3]), 1, 3)
-	grid.push(dpg.add_button(parent=MainWindow,label="#", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [2,3]), 2, 3)
-	grid.push(dpg.add_button(parent=MainWindow,label="D", width=WindowSize[0]/5, height=WindowSize[1]/5, callback=ButtonPress, user_data = [3,3]), 3, 3)
 
-MainWindow = dpg.add_window(width=WindowSize[0], height=WindowSize[1], tag="PrimaryWindow")
-grid = dpgGrid.Grid(4, 4, MainWindow)
+try:
+	with open("settings.json") as file:
+		settingsDICT = json.loads(file.read())
+		print("settings.json read")
+except (FileNotFoundError):
+	print("settings file not found, creating a new one :)")
+	file = open("settings.json", "x")
+	with open("settings.json", "w") as file:
+		file.write(json.dumps(standardSettings))
+	settingsDICT = standardSettings
 
-AddButtons()
+dpg.create_context()
 
-with dpg.item_handler_registry() as window_hr:
-    dpg.add_item_visible_handler(callback=grid)
-dpg.bind_item_handler_registry(MainWindow, window_hr)
+with dpg.value_registry():
+    dpg.add_int_value(default_value=settingsDICT["volumeValue"], tag="volumeValue")
+    dpg.add_float_value(default_value=settingsDICT["soundDurValue"], tag="soundDurValue")
+    dpg.add_float_value(default_value=settingsDICT["pauseDurValue"], tag="pauseDurValue")
+    dpg.add_bool_value(default_value=bool(settingsDICT["expandedNumpadValue"]), tag="expandedNumpadValue")
 
-dpg.set_primary_window("PrimaryWindow", True)
+with dpg.window(tag="mainWindow"):
+    with dpg.tab_bar(tag="tabBar") as tb:
+        with dpg.tab(label="Numpad", tag="tabNumpad"):
+        	addButtons(None, None, None)
+        with dpg.tab(label="Settings", tag="tabSettings"):
+        	dpg.add_slider_int(label="Volume", tag="VolumeSettingSlider", min_value=0, max_value=100, source="volumeValue")
+        	dpg.add_slider_float(label="Sound Duration", tag="soundDurSlider", min_value=0.04, max_value=1, source="soundDurValue")
+        	dpg.add_slider_float(label="Pause Duration", tag="pauseDurSlider", min_value=0.001, max_value=0.01, source="pauseDurValue")
+        	dpg.add_combo(label="Sample Rate", tag="srMenu", items=srOptions, default_value=settingsDICT["srSelection"])
+        	dpg.add_checkbox(label="Toggle expanded Numpad", tag="toggleExpandedNumpad", source="expandedNumpadValue", callback=addButtons, user_data="checkboxValueChanged")
+
+
+
+dpg.setup_dearpygui()
+dpg.create_viewport(width=WindowSize[0], height=WindowSize[1], title="An actual Phone?!")
+dpg.show_viewport()
+dpg.set_primary_window("mainWindow", True)
 dpg.start_dearpygui()
+
+settingsDICT = {
+	"volumeValue": dpg.get_value("volumeValue"),
+	"soundDurValue": dpg.get_value("soundDurValue"),
+	"pauseDurValue": dpg.get_value("pauseDurValue"),
+	"srSelection": dpg.get_value("srMenu"),
+	"expandedNumpadValue": dpg.get_value("expandedNumpadValue")
+}
+
+with open("settings.json", "w") as file:
+	file.write(json.dumps(settingsDICT))
+	print("saved settings")
+
+dpg.destroy_context()
