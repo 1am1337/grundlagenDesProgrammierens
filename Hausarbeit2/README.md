@@ -1,5 +1,8 @@
 # PhoneGuy.py
 Benötigte packages:
-dearpygui
-numpy
-pyaudio
+
+- dearpygui
+
+- numpy
+
+- pyaudio
